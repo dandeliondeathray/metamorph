@@ -16,13 +16,15 @@ type KafkaSystem struct {
 	server    *Server
 	zookeeper *kafkaSystemProcess
 	kafka     *kafkaSystemProcess
+	consumer  *consumer
 }
 
 func NewKafkaSystem(server *Server) *KafkaSystem {
 	return &KafkaSystem{
 		server:    server,
 		zookeeper: newKafkaSystemProcess("Zookeeper", "/tmp/zookeeper", "/kafka/bin/zookeeper-server-start.sh", "/kafka/config/zookeeper.properties"),
-		kafka:     newKafkaSystemProcess("Kafka", "/tmp/kafka-logs", "/kafka/bin/kafka-server-start.sh", "/kafka/config/server.properties")}
+		kafka:     newKafkaSystemProcess("Kafka", "/tmp/kafka-logs", "/kafka/bin/kafka-server-start.sh", "/kafka/config/server.properties"),
+		consumer:  nil}
 }
 
 func (k *KafkaSystem) Reset() {
@@ -49,6 +51,12 @@ func (k *KafkaSystem) Reset() {
 	kafkaProbe := newProbe("localhost", 9092, 2*time.Second)
 	if !kafkaProbe.run(10) {
 		k.server.SendErrorEvent("Kafka process did not respond to probe within the timeout")
+		return
+	}
+
+	k.consumer = newConsumer(k.server)
+	if err := k.consumer.start(); err != nil {
+		log.Println("Could not start consumer:", err)
 		return
 	}
 

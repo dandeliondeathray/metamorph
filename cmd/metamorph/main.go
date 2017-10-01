@@ -3,12 +3,16 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/Shopify/sarama"
 	"github.com/dandeliondeathray/metamorph"
 	"github.com/gorilla/mux"
 )
 
 func main() {
+	sarama.Logger = log.New(os.Stdout, "[sarama] ", log.LstdFlags)
+
 	log.Println("Starting Metamorph...")
 	server := metamorph.NewServer()
 

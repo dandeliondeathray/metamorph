@@ -28,7 +28,7 @@ class Metamorph:
     def await_reset_complete(self):
         return self._await_event("reset_complete", matcher=None, timeout=60.0)
 
-    def _await_event(self, event_type, matcher=None, timeout=2.0):
+    def _await_event(self, event_type, matcher=None, timeout=5.0):
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(self._timed_await_event(event_type, matcher, timeout))
 
