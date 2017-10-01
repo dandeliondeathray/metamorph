@@ -17,14 +17,24 @@ type Server struct {
 	connections map[*websocket.Conn]bool
 	chEvents    chan interface{}
 	mutex       sync.Mutex
+	Kafka       *KafkaSystem
 }
 
 func NewServer() *Server {
-	return &Server{make(map[*websocket.Conn]bool), make(chan interface{}, 100), sync.Mutex{}}
+	return &Server{make(map[*websocket.Conn]bool), make(chan interface{}, 100), sync.Mutex{}, nil}
 }
 
 func (s *Server) SendEvent(ev interface{}) {
 	s.chEvents <- ev
+}
+
+type errorEv struct {
+	Type    string `json:"type"`
+	Message string `json:"message"`
+}
+
+func (s *Server) SendErrorEvent(message string) interface{} {
+	return errorEv{Type: "error", Message: message}
 }
 
 func (s *Server) Start() {
@@ -79,6 +89,7 @@ func (s *Server) eventsReader(c *websocket.Conn) {
 
 		if genCommand.Type == "reset_kafka_system" {
 			// TODO: Perform reset
+			s.Kafka.Reset()
 		}
 	}
 }

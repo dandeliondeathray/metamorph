@@ -12,6 +12,10 @@ import (
 func main() {
 	log.Println("Starting Metamorph...")
 	server := metamorph.NewServer()
+
+	kafka := metamorph.NewKafkaSystem(server)
+	server.Kafka = kafka
+
 	server.Start()
 
 	r := mux.NewRouter()
@@ -34,6 +38,6 @@ func sendFakeEvents(s *metamorph.Server) {
 	for {
 		s.SendEvent(fakeEvent{"message", "gurka", count})
 		count++
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(5000 * time.Millisecond)
 	}
 }

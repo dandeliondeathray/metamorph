@@ -26,14 +26,14 @@ class Metamorph:
         return self._await_event("message", matcher)
 
     def await_reset_complete(self):
-        return self._await_event("reset_complete", None)
+        return self._await_event("reset_complete", matcher=None, timeout=60.0)
 
-    def _await_event(self, event_type, matcher=None):
+    def _await_event(self, event_type, matcher=None, timeout=2.0):
         loop = asyncio.get_event_loop()
-        return loop.run_until_complete(self._timed_await_event(event_type, matcher))
+        return loop.run_until_complete(self._timed_await_event(event_type, matcher, timeout))
 
-    def _timed_await_event(self, event_type, matcher):
-        message = yield from asyncio.wait_for(self._do_await_event(event_type, matcher), 2.0)
+    def _timed_await_event(self, event_type, matcher, timeout):
+        message = yield from asyncio.wait_for(self._do_await_event(event_type, matcher), timeout)
         return message
 
     async def _do_await_event(self, event_type, matcher_arg=None):
@@ -50,6 +50,8 @@ class Metamorph:
             raw_event = await self.ws.recv()
             print("  Raw:", raw_event)
             event = json.loads(raw_event)
+            if event['type'] == 'error':
+                print("Received error from Metamorph: {}".format(event['message']))
             if event['type'] == event_type and matcher.matches(event):
                 print("  Yes, right type")
                 return event
