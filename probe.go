@@ -19,10 +19,10 @@ func newProbe(host string, port int, delay time.Duration) *probe {
 
 func (p *probe) run(count int) bool {
 	for i := 0; i < count; i++ {
+		time.Sleep(p.delay)
 		if p.doProbing() {
 			return true
 		}
-		time.Sleep(p.delay)
 	}
 	return false
 }

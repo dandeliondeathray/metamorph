@@ -21,8 +21,8 @@ type KafkaSystem struct {
 func NewKafkaSystem(server *Server) *KafkaSystem {
 	return &KafkaSystem{
 		server:    server,
-		zookeeper: newKafkaSystemProcess("Zookeeper", "/bin/sleep", "10000"),
-		kafka:     newKafkaSystemProcess("Kafka", "/bin/sleep", "100000")}
+		zookeeper: newKafkaSystemProcess("Zookeeper", "/kafka/bin/zookeeper-server-start.sh", "/kafka/config/zookeeper.properties"),
+		kafka:     newKafkaSystemProcess("Kafka", "/kafka/bin/kafka-server-start.sh", "/kafka/config/server.properties")}
 }
 
 func (k *KafkaSystem) Reset() {
@@ -36,18 +36,20 @@ func (k *KafkaSystem) Reset() {
 		return
 	}
 
+	time.Sleep(30 * time.Second)
+
 	k.zookeeper.start()
 
-	zookeeperProbe := newProbe("localhost", 2181, 1*time.Second)
-	if !zookeeperProbe.run(3) {
+	zookeeperProbe := newProbe("localhost", 2181, 2*time.Second)
+	if !zookeeperProbe.run(10) {
 		k.server.SendErrorEvent("Zookeeper process did not respond to probe within the timeout")
 		return
 	}
 
 	k.kafka.start()
 
-	kafkaProbe := newProbe("localhost", 9092, 1*time.Second)
-	if !kafkaProbe.run(3) {
+	kafkaProbe := newProbe("localhost", 9092, 2*time.Second)
+	if !kafkaProbe.run(10) {
 		k.server.SendErrorEvent("Kafka process did not respond to probe within the timeout")
 		return
 	}
@@ -58,12 +60,12 @@ func (k *KafkaSystem) Reset() {
 func (k *KafkaSystem) stopProcess(process *kafkaSystemProcess) error {
 	chExitSignal := make(chan bool)
 
-	if k.zookeeper.isRunning() {
+	if process.isRunning() {
 		err := process.stop(chExitSignal)
 		if err != nil {
 			log.Printf("Could not stop %s", process.name)
 			k.server.SendErrorEvent("%s could not be stopped")
-			return fmt.Errorf("Could not stop Zookeeper")
+			return fmt.Errorf("Could not stop %s", process.name)
 		}
 
 		select {
