@@ -40,7 +40,7 @@ func (s *Server) EventWebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) eventsWriter() {
 	for event := range s.chEvents {
-		log.Printf("Broadcasting event %s\n", event)
+		log.Printf("Broadcasting event %v\n", event)
 
 		s.mutex.Lock()
 

@@ -17,8 +17,16 @@ class Metamorph:
         loop = asyncio.get_event_loop()
         self.ws = loop.run_until_complete(websockets.connect('ws://{}'.format(url)))
 
+    def request_kafka_reset(self):
+        reset_event = {'type': 'reset_kafka_system'}
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.ws.send(json.dumps(reset_event)))
+
     def await_message(self, matcher=None):
         return self._await_event("message", matcher)
+
+    def await_reset_complete(self):
+        return self._await_event("reset_complete", None)
 
     def _await_event(self, event_type, matcher=None):
         loop = asyncio.get_event_loop()
