@@ -1,2 +1,5 @@
+import pymetamorph.pymetamorph.metamorph as morph
+
+
 def before_feature(context, feature):
-    pass
+    context.metamorph = morph.Metamorph()
