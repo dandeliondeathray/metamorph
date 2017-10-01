@@ -21,8 +21,8 @@ type KafkaSystem struct {
 func NewKafkaSystem(server *Server) *KafkaSystem {
 	return &KafkaSystem{
 		server:    server,
-		zookeeper: newKafkaSystemProcess("Zookeeper", "/kafka/bin/zookeeper-server-start.sh", "/kafka/config/zookeeper.properties"),
-		kafka:     newKafkaSystemProcess("Kafka", "/kafka/bin/kafka-server-start.sh", "/kafka/config/server.properties")}
+		zookeeper: newKafkaSystemProcess("Zookeeper", "/tmp/zookeeper", "/kafka/bin/zookeeper-server-start.sh", "/kafka/config/zookeeper.properties"),
+		kafka:     newKafkaSystemProcess("Kafka", "/tmp/kafka-logs", "/kafka/bin/kafka-server-start.sh", "/kafka/config/server.properties")}
 }
 
 func (k *KafkaSystem) Reset() {
@@ -35,8 +35,6 @@ func (k *KafkaSystem) Reset() {
 	if err != nil {
 		return
 	}
-
-	time.Sleep(30 * time.Second)
 
 	k.zookeeper.start()
 
@@ -87,15 +85,16 @@ func (k *KafkaSystem) sendResetCompleteEvent() {
 	k.server.SendEvent(resetCompleteEvent{Type: "reset_complete"})
 }
 
-func newKafkaSystemProcess(name string, cmd string, args ...string) *kafkaSystemProcess {
-	return &kafkaSystemProcess{process: nil, name: name, cmd: cmd, args: args}
+func newKafkaSystemProcess(name string, pathToRemove string, cmd string, args ...string) *kafkaSystemProcess {
+	return &kafkaSystemProcess{process: nil, name: name, cmd: cmd, args: args, pathToRemove: pathToRemove}
 }
 
 type kafkaSystemProcess struct {
-	process *os.Process
-	name    string
-	cmd     string
-	args    []string
+	process      *os.Process
+	name         string
+	cmd          string
+	args         []string
+	pathToRemove string
 }
 
 func (z *kafkaSystemProcess) isRunning() bool {
@@ -104,6 +103,9 @@ func (z *kafkaSystemProcess) isRunning() bool {
 
 func (z *kafkaSystemProcess) start() {
 	log.Printf("Starting %s...", z.name)
+
+	os.RemoveAll(z.pathToRemove)
+
 	cmd := exec.Command(z.cmd, z.args...)
 	cmd.Start()
 	z.process = cmd.Process
