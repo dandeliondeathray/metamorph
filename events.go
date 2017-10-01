@@ -1,12 +1,17 @@
 package metamorph
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"sync"
 
 	"github.com/gorilla/websocket"
 )
+
+type generalCommand struct {
+	Type string `json:"type"`
+}
 
 type Server struct {
 	connections map[*websocket.Conn]bool
@@ -57,9 +62,23 @@ func (s *Server) eventsReader(c *websocket.Conn) {
 	defer s.closeConnection(c)
 
 	for {
-		_, _, err := c.ReadMessage()
+		_, p, err := c.ReadMessage()
+		log.Printf("Read message from Metamorph client: %v", p)
 		if err != nil {
-			return
+			log.Println("Read error:", err)
+			break
+		}
+
+		var genCommand generalCommand
+		err = json.Unmarshal(p, &genCommand)
+		if err != nil {
+			log.Println("Parse command type error:", err)
+			break
+		}
+		log.Printf("Command: %v", genCommand)
+
+		if genCommand.Type == "reset_kafka_system" {
+			// TODO: Perform reset
 		}
 	}
 }
