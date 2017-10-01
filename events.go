@@ -34,6 +34,7 @@ type errorEv struct {
 }
 
 func (s *Server) SendErrorEvent(message string) interface{} {
+	log.Println("ERROR:", message)
 	return errorEv{Type: "error", Message: message}
 }
 

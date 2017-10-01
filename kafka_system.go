@@ -38,11 +38,19 @@ func (k *KafkaSystem) Reset() {
 
 	k.zookeeper.start()
 
-	// TODO: Wait for Zookeeper to start properly
+	zookeeperProbe := newProbe("localhost", 2181, 1*time.Second)
+	if !zookeeperProbe.run(3) {
+		k.server.SendErrorEvent("Zookeeper process did not respond to probe within the timeout")
+		return
+	}
 
 	k.kafka.start()
 
-	// TODO: Await Kafka up and running
+	kafkaProbe := newProbe("localhost", 9092, 1*time.Second)
+	if !kafkaProbe.run(3) {
+		k.server.SendErrorEvent("Kafka process did not respond to probe within the timeout")
+		return
+	}
 
 	k.sendResetCompleteEvent()
 }
