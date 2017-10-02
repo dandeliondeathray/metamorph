@@ -69,6 +69,19 @@ class Any:
         return repr(self)
 
 
+class MatchThese:
+    def __init__(self, *matchers):
+        self._matchers = matchers
+
+    def matches(self, m):
+        return all([matcher.matches(m) for matcher in self._matchers])
+
+    def __repr__(self):
+        return 'MatchThese({})'.format(repr(self._matchers))
+
+    def __str__(self):
+        return repr(self)
+
 class OnTopic:
     def __init__(self, topic):
         self._topic = topic
