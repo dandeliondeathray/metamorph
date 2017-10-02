@@ -5,6 +5,7 @@
 import json
 import asyncio
 import websockets
+import base64
 
 
 class Metamorph:
@@ -94,3 +95,8 @@ class OnTopic:
 
     def __str__(self):
         return repr(self)
+
+
+def value_as_string(event):
+    decoded = base64.decodebytes(event['message'])
+    return decoded.decode('UTF-8')
