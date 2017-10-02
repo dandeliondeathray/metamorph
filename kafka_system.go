@@ -27,7 +27,7 @@ func NewKafkaSystem(server *Server) *KafkaSystem {
 		consumer:  nil}
 }
 
-func (k *KafkaSystem) Reset() {
+func (k *KafkaSystem) Reset(topics []string) {
 	err := k.StopSystem()
 	if err != nil {
 		return
@@ -50,7 +50,7 @@ func (k *KafkaSystem) Reset() {
 	}
 
 	k.consumer = newConsumer(k.server)
-	if err := k.consumer.start(); err != nil {
+	if err := k.consumer.start(topics); err != nil {
 		log.Println("Could not start consumer:", err)
 		return
 	}

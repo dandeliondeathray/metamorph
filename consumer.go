@@ -13,15 +13,24 @@ func newConsumer(server *Server) *consumer {
 	return &consumer{server, nil, make([]sarama.PartitionConsumer, 5)}
 }
 
-func (c *consumer) start() error {
+func (c *consumer) start(topics []string) error {
 	config := sarama.NewConfig()
 	consumer, err := sarama.NewConsumer([]string{"localhost:9092"}, config)
 	if err != nil {
 		return err
 	}
 
-	topic := "test_topic"
+	for i := range topics {
+		err = c.consumeTopic(consumer, topics[i])
+		if err != nil {
+			return err
+		}
+	}
 
+	return nil
+}
+
+func (c *consumer) consumeTopic(consumer sarama.Consumer, topic string) error {
 	log.Println("Creating consumer for topic", topic)
 	partitions, err := consumer.Partitions(topic)
 	if err != nil {

@@ -17,6 +17,6 @@ def before_feature(context, feature):
 
 
 def before_scenario(context, scenario):
-    context.metamorph.request_kafka_reset()
+    context.metamorph.request_kafka_reset(["test_topic", "events"])
     context.metamorph.await_reset_complete()
     context.service = Service()

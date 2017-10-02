@@ -13,6 +13,11 @@ type generalCommand struct {
 	Type string `json:"type"`
 }
 
+type resetCommand struct {
+	Type   string   `json:"type"`
+	Topics []string `json:"topics"`
+}
+
 type Server struct {
 	connections map[*websocket.Conn]bool
 	chEvents    chan interface{}
@@ -89,8 +94,13 @@ func (s *Server) eventsReader(c *websocket.Conn) {
 		log.Printf("Command: %v", genCommand)
 
 		if genCommand.Type == "reset_kafka_system" {
-			// TODO: Perform reset
-			s.Kafka.Reset()
+			resetCommand := resetCommand{"", []string{}}
+			err = json.Unmarshal(p, &resetCommand)
+			if err != nil {
+				log.Println("Could not parse reset command, error:", err)
+				break
+			}
+			s.Kafka.Reset(resetCommand.Topics)
 		}
 	}
 }
