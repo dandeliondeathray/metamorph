@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 
 	"github.com/Shopify/sarama"
 	"github.com/dandeliondeathray/metamorph"
@@ -19,6 +20,10 @@ func main() {
 	kafka := metamorph.NewKafkaSystem(server)
 	server.Kafka = kafka
 
+	chSignal := make(chan os.Signal, 10)
+	signal.Notify(chSignal, os.Interrupt)
+	go stopSystemOnSignal(chSignal, kafka)
+
 	server.Start()
 
 	r := mux.NewRouter()
@@ -27,4 +32,11 @@ func main() {
 	http.Handle("/", r)
 
 	log.Fatal(http.ListenAndServe(":23572", r))
+}
+
+func stopSystemOnSignal(chSignal <-chan os.Signal, kafka *metamorph.KafkaSystem) {
+	signal := <-chSignal
+	log.Println("Handling signal:", signal)
+	kafka.StopSystem()
+	os.Exit(0)
 }

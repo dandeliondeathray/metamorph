@@ -28,12 +28,7 @@ func NewKafkaSystem(server *Server) *KafkaSystem {
 }
 
 func (k *KafkaSystem) Reset() {
-	err := k.stopProcess(k.kafka)
-	if err != nil {
-		return
-	}
-
-	err = k.stopProcess(k.zookeeper)
+	err := k.StopSystem()
 	if err != nil {
 		return
 	}
@@ -61,6 +56,20 @@ func (k *KafkaSystem) Reset() {
 	}
 
 	k.sendResetCompleteEvent()
+}
+
+func (k *KafkaSystem) StopSystem() error {
+	err := k.stopProcess(k.kafka)
+	if err != nil {
+		return err
+	}
+
+	err = k.stopProcess(k.zookeeper)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (k *KafkaSystem) stopProcess(process *kafkaSystemProcess) error {
