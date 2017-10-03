@@ -12,6 +12,10 @@ import (
 )
 
 func main() {
+	metamorphAddress := os.Getenv("METAMORPH_ADDRESS")
+	if len(metamorphAddress) == 0 {
+		metamorphAddress = ":23572"
+	}
 	sarama.Logger = log.New(os.Stdout, "[sarama] ", log.LstdFlags)
 
 	log.Println("Starting Metamorph...")
@@ -31,7 +35,7 @@ func main() {
 
 	http.Handle("/", r)
 
-	log.Fatal(http.ListenAndServe(":23572", r))
+	log.Fatal(http.ListenAndServe(metamorphAddress, r))
 }
 
 func stopSystemOnSignal(chSignal <-chan os.Signal, kafka *metamorph.KafkaSystem) {
