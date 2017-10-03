@@ -28,6 +28,19 @@ Between each test, or between some groups of tests, you will want to reset the K
 Metamorph creates, so each test runs against a known state. We don't want your tests to interfere
 with each other. Note that this implies you will also restart the Baz service.
 
+A test will generally follow these steps:
+
+- Start Metamorph once
+- For each test case
+    + Request that Metamorph (re)start the Kafka system
+    + Wait for Kafka to start up
+    + Start the microservice
+    + Using the Pymetamorph client, send a message to some topic via the Kafka broker
+    + Wait for the microservice to send a message to some topic
+    + Verify that the message is as expected
+    + Shut down the service
+- Shut down Metamorph
+
 # Example
 The Doubler service in `examples/doubler` serves as an example of how to use Metamorph and
 Pymetamorph with the BDD framework Behave.
