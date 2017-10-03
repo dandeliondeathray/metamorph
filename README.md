@@ -32,5 +32,8 @@ with each other. Note that this implies you will also restart the Baz service.
 The Doubler service in `examples/doubler` serves as an example of how to use Metamorph and
 Pymetamorph with the BDD framework Behave.
 
+The Tripler service, in `examples/tripler`, suspiciously similar to the Doubler service, serves as
+a more straightforward, but unrealistic, example if you're unused to Behave or BDD frameworks.
+
 # License
 Apache License 2.0

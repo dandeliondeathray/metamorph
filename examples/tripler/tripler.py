@@ -7,15 +7,15 @@ consumer = Consumer({'bootstrap.servers': 'localhost:9092', 'group.id': 'mygroup
 
 
 def send_response(value):
-    producer.produce("doublerout", value=json.dumps({'doubled': value}))
+    producer.produce("triplerout", value=json.dumps({'tripled': value}))
     producer.flush()
 
 
 def send_error(message):
-    producer.produce("doublerout", value=json.dumps({'error': message}))
+    producer.produce("triplerout", value=json.dumps({'error': message}))
     producer.flush()
 
-consumer.subscribe(['doublerin'])
+consumer.subscribe(['triplerin'])
 running = True
 while running:
     msg = consumer.poll()
@@ -25,7 +25,7 @@ while running:
         try:
             request = json.loads(json_string)
             number = int(request['number'])
-            send_response(number * 2)
+            send_response(number * 3)
         except:
             send_error("Malformed message")
 
