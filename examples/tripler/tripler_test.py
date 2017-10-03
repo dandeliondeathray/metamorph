@@ -6,7 +6,7 @@ Note that this test expects Metamorph to already be up and running.
 Usage: python tripler_test.py
 
 """
-import pymetamorph.pymetamorph.metamorph as metamorph
+import pymetamorph.metamorph as metamorph
 import json
 import subprocess
 import time
@@ -14,6 +14,7 @@ import time
 # This is the client we'll use to tell Metamorph to start up a Kafka system, and for it to tell us whenever a message
 # is received.
 metamorph_client = metamorph.Metamorph()
+metamorph_client.connect()
 
 #
 # Start the Kafka system
