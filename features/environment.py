@@ -8,6 +8,11 @@ class Service:
                                    'default.topic.config': {'auto.offset.reset': 'smallest'}})
         self._received = []
 
+    def terminate(self):
+        self._consumer.close()
+        self._consumer = None
+        self._producer = None
+
     def subscribe_to(self, *topics):
         self._consumer.subscribe(topics)
 
@@ -38,3 +43,7 @@ def before_scenario(context, scenario):
     context.metamorph.request_kafka_reset(["test_topic", "events"])
     context.metamorph.await_reset_complete()
     context.service = Service()
+
+
+def after_scenario(context, scenario):
+    context.service.terminate()

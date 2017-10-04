@@ -19,12 +19,14 @@ class Metamorph:
         self.ws = loop.run_until_complete(websockets.connect('ws://{}'.format(url)))
 
     def request_kafka_reset(self, topics):
-        reset_event = {'type': 'reset_kafka_system', 'topics': topics}
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.ws.send(json.dumps(reset_event)))
+        self._send_event({'type': 'reset_kafka_system', 'topics': topics})
 
-    def send_message(self, topic, value):
-        pass
+    def send_message(self, topic, value, partition=0, key=None):
+        self._send_event({'type': 'send', 'topic': topic, 'value': value, 'partition': partition, 'key': key})
+
+    def _send_event(self, event):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.ws.send(json.dumps(event)))
 
     def await_message(self, matcher=None):
         return self._await_event("message", matcher)
