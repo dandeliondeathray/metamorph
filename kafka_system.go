@@ -17,6 +17,7 @@ type KafkaSystem struct {
 	zookeeper *kafkaSystemProcess
 	kafka     *kafkaSystemProcess
 	consumer  *consumer
+	producer  *producer
 }
 
 func NewKafkaSystem(server *Server) *KafkaSystem {
@@ -52,6 +53,14 @@ func (k *KafkaSystem) Reset(topics []string) {
 	k.consumer = newConsumer(k.server)
 	if err := k.consumer.start(topics); err != nil {
 		log.Println("Could not start consumer:", err)
+		k.server.SendErrorEvent("Could not start Kafka consumer")
+		return
+	}
+
+	k.producer, err = newProducer()
+	if err != nil {
+		log.Println("Could not start producer:", err)
+		k.server.SendErrorEvent("Could not start Kafka producer")
 		return
 	}
 
@@ -70,6 +79,15 @@ func (k *KafkaSystem) StopSystem() error {
 	}
 
 	return nil
+}
+
+func (k *KafkaSystem) Send(value, topic string) {
+	err := k.producer.sendMessage(value, topic)
+	if err != nil {
+		errorMsg := fmt.Sprintf("Could not send message '%s' to topic '%s': %v", value, topic, err)
+		log.Println(errorMsg)
+		k.server.SendErrorEvent(errorMsg)
+	}
 }
 
 func (k *KafkaSystem) stopProcess(process *kafkaSystemProcess) error {

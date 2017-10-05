@@ -1,6 +1,7 @@
 import pymetamorph.metamorph as morph
 from confluent_kafka import Producer, Consumer
 
+
 class Service:
     def __init__(self):
         self._producer = Producer({'bootstrap.servers': 'localhost:9092'})
@@ -14,7 +15,8 @@ class Service:
         self._producer = None
 
     def subscribe_to(self, *topics):
-        self._consumer.subscribe(topics)
+        print("Topics: '{}'".format(list(topics)))
+        self._consumer.subscribe(list(topics))
 
     def send_message(self, key, value, topic):
         print("Sending {}, {} to topic {}".format(key, value, topic))
@@ -28,7 +30,9 @@ class Service:
             if msg is None:
                 continue
             if not msg.error():
-                if msg.topic() == topic and msg.value() == value:
+                print("Topic: '{}', Value: '{}'".format(msg.topic(), msg.value()))
+                value_as_string = msg.value().decode('UTF-8')
+                if msg.topic() == topic and value_as_string == value:
                     return msg
                 self._received.append(msg)
         raise RuntimeError("No message {} in topic {} was received".format(value, topic))

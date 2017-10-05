@@ -18,6 +18,12 @@ type resetCommand struct {
 	Topics []string `json:"topics"`
 }
 
+type sendCommand struct {
+	Type  string `json:"type"`
+	Topic string `json:"topic"`
+	Value string `json:"value"`
+}
+
 type Server struct {
 	connections map[*websocket.Conn]bool
 	chEvents    chan interface{}
@@ -101,6 +107,14 @@ func (s *Server) eventsReader(c *websocket.Conn) {
 				break
 			}
 			s.Kafka.Reset(resetCommand.Topics)
+		} else if genCommand.Type == "send" {
+			sendCommand := sendCommand{}
+			err = json.Unmarshal(p, &sendCommand)
+			if err != nil {
+				log.Println("Could not parse send command, error:", err)
+			}
+			log.Printf("Received send event on topic %s with value %s", sendCommand.Topic, sendCommand.Value)
+			s.Kafka.Send(sendCommand.Value, sendCommand.Topic)
 		}
 	}
 }

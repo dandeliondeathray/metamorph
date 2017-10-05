@@ -30,13 +30,17 @@ def step_impl(context):
     assert_that(m['topic'], equal_to(context.topic))
 
 
-@when(u'a message event is sent from the test to Metamorph')
+@when(u'a message event is sent from the test to Metamorph on topic "servicetopic"')
 def step_impl(context):
-    context.topic = "events"
+    context.topic = "servicetopic"
     context.value = "Some value"
     context.metamorph.send_message(topic=context.topic, value=context.value)
 
 
-@then(u'the message can be consumed the service')
+@then(u'the message can be consumed by the service')
 def step_impl(context):
     context.service.await_message(context.value, context.topic)
+
+@given(u'the service subscribes to the topic "servicetopic"')
+def step_impl(context):
+    context.service.subscribe_to("servicetopic")

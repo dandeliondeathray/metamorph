@@ -12,9 +12,11 @@ Feature: Messages are sent as events over a WebSocket connection
      When a message is sent by the service to Kafka
      Then a message event is received on the event interface
 
+  @wip
   Scenario: A message is sent from the test
-     When a message event is sent from the test to Metamorph
-     Then the message can be consumed the service
+    Given the service subscribes to the topic "servicetopic"
+     When a message event is sent from the test to Metamorph on topic "servicetopic"
+     Then the message can be consumed by the service
 
   Scenario: Topic is included in a message event
     Given the topic "events"
