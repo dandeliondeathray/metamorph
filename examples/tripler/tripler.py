@@ -21,7 +21,7 @@ while running:
     msg = consumer.poll()
     if not msg.error():
         json_string = msg.value().decode('utf-8')
-        print('Received message: %s' % json_string)
+        print('[Tripler Microservice] Received message: %s' % json_string)
         try:
             request = json.loads(json_string)
             number = int(request['number'])

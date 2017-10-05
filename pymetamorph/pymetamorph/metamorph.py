@@ -18,6 +18,10 @@ class Metamorph:
         loop = asyncio.get_event_loop()
         self.ws = loop.run_until_complete(websockets.connect('ws://{}'.format(url)))
 
+    def close(self):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.ws.close())
+
     def request_kafka_reset(self, topics):
         self._send_event({'type': 'reset_kafka_system', 'topics': topics})
 
@@ -101,5 +105,5 @@ class OnTopic:
 
 
 def value_as_string(event):
-    decoded = base64.decodebytes(event['message'])
+    decoded = base64.b64decode(event['message'])
     return decoded.decode('UTF-8')

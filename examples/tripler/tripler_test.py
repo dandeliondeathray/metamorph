@@ -72,3 +72,4 @@ else:
 # Terminate Tripler
 #
 tripler_process.terminate()
+metamorph_client.close()

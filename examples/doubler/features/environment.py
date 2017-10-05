@@ -1,4 +1,4 @@
-import pymetamorph.pymetamorph.metamorph as metamorph
+import pymetamorph.metamorph as metamorph
 
 
 def before_scenario(context, scenario):
