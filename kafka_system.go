@@ -81,7 +81,7 @@ func (k *KafkaSystem) StopSystem() error {
 	return nil
 }
 
-func (k *KafkaSystem) Send(value, topic string) {
+func (k *KafkaSystem) Send(value []byte, topic string) {
 	err := k.producer.sendMessage(value, topic)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Could not send message '%s' to topic '%s': %v", value, topic, err)

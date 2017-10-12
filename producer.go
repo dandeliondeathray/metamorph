@@ -19,7 +19,7 @@ func newProducer() (*producer, error) {
 	return &producer{syncProducer: p}, nil
 }
 
-func (p *producer) sendMessage(value, topic string) error {
+func (p *producer) sendMessage(value []byte, topic string) error {
 	msg := &sarama.ProducerMessage{Topic: topic, Value: sarama.StringEncoder(value)}
 	partition, offset, err := p.syncProducer.SendMessage(msg)
 	if err != nil {

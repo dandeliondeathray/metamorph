@@ -1,6 +1,7 @@
 package metamorph
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -112,9 +113,14 @@ func (s *Server) eventsReader(c *websocket.Conn) {
 			err = json.Unmarshal(p, &sendCommand)
 			if err != nil {
 				log.Println("Could not parse send command, error:", err)
+				return
 			}
-			log.Printf("Received send event on topic %s with value %s", sendCommand.Topic, sendCommand.Value)
-			s.Kafka.Send(sendCommand.Value, sendCommand.Topic)
+			valueBytes, err := base64.StdEncoding.DecodeString(sendCommand.Value)
+			if err != nil {
+				log.Printf("Could not parse value %s as base64", sendCommand.Value)
+			}
+			log.Printf("Received send event on topic %s with value %s", sendCommand.Topic, valueBytes)
+			s.Kafka.Send(valueBytes, sendCommand.Topic)
 		}
 	}
 }
