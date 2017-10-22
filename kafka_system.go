@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 )
 
@@ -20,12 +21,31 @@ type KafkaSystem struct {
 	producer  *producer
 }
 
-func NewKafkaSystem(server *Server) *KafkaSystem {
+type KafkaConfig struct {
+	Root          string
+	TemporaryPath string
+}
+
+func DefaultKafkaConfig() KafkaConfig {
+	return KafkaConfig{"", "/tmp"}
+}
+
+func NewKafkaSystem(server *Server, config KafkaConfig) *KafkaSystem {
+	kafkaBinPath := filepath.Join(config.Root, "bin")
+	kafkaConfigPath := filepath.Join(config.Root, "config")
 	return &KafkaSystem{
-		server:    server,
-		zookeeper: newKafkaSystemProcess("Zookeeper", "/tmp/zookeeper", "/kafka/bin/zookeeper-server-start.sh", "/kafka/config/zookeeper.properties"),
-		kafka:     newKafkaSystemProcess("Kafka", "/tmp/kafka-logs", "/kafka/bin/kafka-server-start.sh", "/kafka/config/server.properties"),
-		consumer:  nil}
+		server: server,
+		zookeeper: newKafkaSystemProcess(
+			"Zookeeper",
+			filepath.Join(config.TemporaryPath, "zookeeper"),
+			filepath.Join(kafkaBinPath, "zookeeper-server-start.sh"),
+			filepath.Join(kafkaConfigPath, "zookeeper.properties")),
+		kafka: newKafkaSystemProcess(
+			"Kafka",
+			filepath.Join(config.TemporaryPath, "kafka-logs"),
+			filepath.Join(kafkaBinPath, "kafka-server-start.sh"),
+			filepath.Join(kafkaConfigPath, "server.properties")),
+		consumer: nil}
 }
 
 func (k *KafkaSystem) Reset(topics []string) {

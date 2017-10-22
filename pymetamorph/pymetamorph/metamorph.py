@@ -28,6 +28,10 @@ class Metamorph:
     def send_message(self, topic, value, partition=0, key=None):
         self._send_event({'type': 'send', 'topic': topic, 'value': value, 'partition': partition, 'key': key})
 
+    def send_string_message(self, topic, value, partition=0, key=None):
+        encoded = base64.b64encode(value.encode('UTF-8')).decode('UTF-8')
+        self.send_message(topic, encoded, partition, key)
+
     def _send_event(self, event):
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.ws.send(json.dumps(event)))
@@ -46,18 +50,18 @@ class Metamorph:
         message = yield from asyncio.wait_for(self._do_await_event(event_type, matcher), timeout)
         return message
 
-    async def _do_await_event(self, event_type, matcher_arg=None):
+    def _do_await_event(self, event_type, matcher_arg=None):
         matcher = matcher_arg if matcher_arg else Any()
         for i in range(len(self.received)):
             event = self.received[i]
             if event['type'] == event_type and matcher.matches(event):
                 self.received = self.received[:i] + self.received[i+1:]
                 return event
-        return await self._read_events_until_type(event_type, matcher)
+        return self._read_events_until_type(event_type, matcher)
 
-    async def _read_events_until_type(self, event_type, matcher):
+    def _read_events_until_type(self, event_type, matcher):
         while True:
-            raw_event = await self.ws.recv()
+            raw_event = yield from self.ws.recv()
             event = json.loads(raw_event)
             if event['type'] == 'error':
                 print("Received error from Metamorph: {}".format(event['message']))

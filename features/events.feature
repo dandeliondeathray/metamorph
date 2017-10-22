@@ -12,7 +12,6 @@ Feature: Messages are sent as events over a WebSocket connection
      When a message is sent by the service to Kafka
      Then a message event is received on the event interface
 
-  @wip
   Scenario: A message is sent from the test
     Given the service subscribes to the topic "servicetopic"
      When a message event is sent from the test to Metamorph on topic "servicetopic"

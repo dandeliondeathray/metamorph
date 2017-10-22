@@ -34,7 +34,7 @@ def step_impl(context):
 def step_impl(context):
     context.topic = "servicetopic"
     context.value = "Some value"
-    context.metamorph.send_message(topic=context.topic, value=context.value)
+    context.metamorph.send_string_message(topic=context.topic, value=context.value)
 
 
 @then(u'the message can be consumed by the service')

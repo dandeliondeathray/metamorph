@@ -16,12 +16,18 @@ func main() {
 	if len(metamorphAddress) == 0 {
 		metamorphAddress = ":23572"
 	}
+
+	kafkaRoot := os.Getenv("METAMORPH_KAFKA_ROOT")
+	log.Println("Using Kafka root", kafkaRoot)
+
 	sarama.Logger = log.New(os.Stdout, "[sarama] ", log.LstdFlags)
 
 	log.Println("Starting Metamorph...")
 	server := metamorph.NewServer()
 
-	kafka := metamorph.NewKafkaSystem(server)
+	kafkaConfig := metamorph.DefaultKafkaConfig()
+	kafkaConfig.Root = kafkaRoot
+	kafka := metamorph.NewKafkaSystem(server, kafkaConfig)
 	server.Kafka = kafka
 
 	chSignal := make(chan os.Signal, 10)

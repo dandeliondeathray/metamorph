@@ -1,0 +1,4 @@
+behave
+websockets
+confluent-kafka
+pyhamcrest
