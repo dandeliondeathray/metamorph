@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/Shopify/sarama"
 	"github.com/dandeliondeathray/metamorph"
@@ -31,7 +32,7 @@ func main() {
 	server.Kafka = kafka
 
 	chSignal := make(chan os.Signal, 10)
-	signal.Notify(chSignal, os.Interrupt)
+	signal.Notify(chSignal, os.Interrupt, syscall.SIGTERM)
 	go stopSystemOnSignal(chSignal, kafka)
 
 	server.Start()
